@@ -1,0 +1,60 @@
+# version: "3.8"
+
+# services:
+#   backend:
+#     build: ./InventoryManagement/InventoryManagement
+#     ports:
+#       - "8087:8083"
+#     container_name: backend-service
+#     dns:
+#       - 8.8.8.8 
+
+#   frontend:
+#     build: ./Inventory_Frontend/inventory
+#     ports:
+#       - "3002:5173"
+#     container_name: frontend-service
+#     depends_on:
+#       - backend
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3307:5"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Strong root password
+      MYSQL_DATABASE: demo_db
+      MYSQL_USER: appuser  # Create app user
+      MYSQL_PASSWORD: apppassword  # App user password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  backend:
+    build: ./InventoryManagement/InventoryManagement
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  frontend:
+    build: ./Inventory_Frontend/inventory
+    ports:
+      - "3002:5173"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
