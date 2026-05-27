@@ -2,13 +2,21 @@ import axios from "axios";
 
 
 
-export const getall = async () => {
-  const token = localStorage.getItem("token"); 
-  return await axios.get("http://localhost:8083/inventory/getall", {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+// export const getall = async () => {
+//   const token = localStorage.getItem("token"); 
+//   return await axios.get("http://localhost:8083/inventory/getall", {
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   });
+// };
+
+export const getall = async (page = 0) => {
+    const token = localStorage.getItem("token");
+    // Pass the page number to Spring Boot. We will keep the size at 10 for now.
+    return await axios.get(`http://localhost:8083/inventory/getall?page=${page}&size=9`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
 };
 
 export const addItem = async (item) => {

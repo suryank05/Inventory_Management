@@ -3,6 +3,7 @@ package com.example.InventoryManagement.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,12 +34,13 @@ public class InventoryController {
 	
 	
 	@GetMapping("/getall")
-	private ResponseEntity<List<InventoryItemEntity>> getAll(){
-		List<InventoryItemEntity> l=service.getAllItems();
-		if(l.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-		}
-		return ResponseEntity.status(HttpStatus.OK).body(service.getAllItems());
+	private ResponseEntity<Page<InventoryItemEntity>> getAll(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="9") int size){
+		Page<InventoryItemEntity> itemPage = service.getItemPaginated(page, size);
+	    
+	    if(itemPage.isEmpty()) {
+	        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+	    }
+	    return ResponseEntity.status(HttpStatus.OK).body(itemPage);
 	}
 	
 	@PostMapping("/add")
@@ -103,8 +105,6 @@ public class InventoryController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-	
-	
 	 
 	
 }
