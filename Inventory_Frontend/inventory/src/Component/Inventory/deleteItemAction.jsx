@@ -27,7 +27,7 @@ export default async function deleteItemAction({params}) {
             if (error.response.status === 404) {
                 return redirect("/inventory?error=not_found");
             } else if (error.response.status === 401) {
-                return redirect("/login?error=unauthorized");
+                return redirect("/auth?error=unauthorized");
             }
         }
         

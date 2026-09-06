@@ -18,7 +18,6 @@ import com.example.InventoryManagement.ObserverNotify.Observer;
 import com.example.InventoryManagement.Repository.DeletedInventoryRepo;
 import com.example.InventoryManagement.Repository.InventoryRepo;
 
-import graphql.com.google.common.base.Optional;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
@@ -110,11 +109,10 @@ public class InventoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Deleted record not found"));
 
         InventoryItemEntity restored = InventoryItemEntity.builder()
-                // .id(snapshot.getOriginalId())  <--- DELETE THIS LINE!
                 .itemName(snapshot.getItemName())
-                .Description(snapshot.getDescription())
-                .Quantity(snapshot.getQuantity())
-                .Price(snapshot.getPrice())
+                .description(snapshot.getDescription())
+                .quantity(snapshot.getQuantity())
+                .price(snapshot.getPrice())
                 .createdAt(snapshot.getCreatedAt())
                 .build();
 

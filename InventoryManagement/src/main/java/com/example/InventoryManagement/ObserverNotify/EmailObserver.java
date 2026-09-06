@@ -19,22 +19,28 @@ public class EmailObserver implements Observer {
     @Override
     public void update(String eventType, String productName) {
         // Only send email on DELETE — ignore everything else
-    	System.out.println("this is the emailObserver");
         if (!eventType.equalsIgnoreCase("Delete")) {
             return;
         }
 
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(recipientEmail);
-        message.setSubject("Inventory Item Deleted: " + productName);
-        message.setText(
-            "Hello Admin,\n\n" +
-            "The product \"" + productName + "\" has been deleted from the inventory.\n\n" +
-            "Please review if this was intentional.\n\n" +
-            "- Inventory Management System"
-        );
+        // Send asynchronously on a separate thread pool so database delete commits instantly
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo(recipientEmail);
+                message.setSubject("Inventory Item Deleted: " + productName);
+                message.setText(
+                    "Hello Admin,\n\n" +
+                    "The product \"" + productName + "\" has been deleted from the inventory.\n\n" +
+                    "Please review if this was intentional.\n\n" +
+                    "- Inventory Management System"
+                );
 
-        mailSender.send(message);
-        System.out.println("Email sent for deletion of: " + productName);
+                mailSender.send(message);
+                System.out.println("Email asynchronously sent for deletion of: " + productName);
+            } catch (Exception e) {
+                System.err.println("Notice: Asynchronous deletion email notification failed for " + productName + ": " + e.getMessage());
+            }
+        });
     }
 }

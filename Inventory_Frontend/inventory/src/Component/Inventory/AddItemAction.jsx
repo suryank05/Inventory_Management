@@ -3,11 +3,11 @@ import { addItem } from "../../Axions/inventoryAxions";
 
 export default async function  AddItemAction({request}) {
     const form=await request.formData();
-        const items={
-            itemName:form.get("itemName"),
-            Description:form.get("description"),
-            Quantity: Number(form.get("quantity")),
-            Price:Number(form.get("price"))
+        const items = {
+            itemName: form.get("itemName"),
+            description: form.get("description"),
+            quantity: Number(form.get("quantity")),
+            price: Number(form.get("price"))
         };
         
         await addItem(items);

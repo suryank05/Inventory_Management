@@ -1,20 +1,23 @@
+import { redirect } from "react-router-dom";
 import { getall } from "../../Axions/inventoryAxions";
 
-// 1. You MUST put { request } inside these brackets so React can read the URL!
 export default async function InventoryListLoader({ request }) {
+    const token = localStorage.getItem("token");
+    if (!token) {
+        return redirect("/auth");
+    }
     try {
-        // 2. Read what page we are currently on from the URL
         const url = new URL(request.url);
         const pageParam = url.searchParams.get("page");
-        
-        // 3. If there is no page in the URL, default to page 0
         const currentPage = pageParam ? Number(pageParam) : 0;
 
-        // 4. Pass the current page to your Axios function!
         const resp = await getall(currentPage);
-        
-        return resp.data; 
+        return resp.data || { content: [], totalPages: 0, totalElements: 0, number: 0, first: true, last: true }; 
     } catch (e) {
-        throw new Response("Failed to load inventory", { status: 500 });
+        if (e.response?.status === 401 || e.response?.status === 403) {
+            localStorage.removeItem("token");
+            return redirect("/auth");
+        }
+        return { content: [], totalPages: 0, totalElements: 0, number: 0, first: true, last: true };
     }
 }

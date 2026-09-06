@@ -1,78 +1,33 @@
-import axios from "axios";
+import api from "./api";
 
-
-
-// export const getall = async () => {
-//   const token = localStorage.getItem("token"); 
-//   return await axios.get("http://localhost:8083/inventory/getall", {
-//     headers: {
-//       Authorization: `Bearer ${token}`
-//     }
-//   });
-// };
-
-export const getall = async (page = 0) => {
-    const token = localStorage.getItem("token");
-    // Pass the page number to Spring Boot. We will keep the size at 10 for now.
-    return await axios.get(`http://localhost:8083/inventory/getall?page=${page}&size=9`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+export const getall = async (page = 0, size = 9) => {
+  return await api.get(`/inventory/getall?page=${page}&size=${size}`);
 };
 
 export const addItem = async (item) => {
-  const token = localStorage.getItem("token"); 
-  return await axios.post("http://localhost:8083/inventory/add", item, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  return await api.post("/inventory/add", item);
 };
+
 export const getDeletedItems = async () => {
-  const token = localStorage.getItem("token");
-  console.log("TOKEN for deleted:", token); 
-  return await axios.get("http://localhost:8083/inventory/deleted", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  return await api.get("/inventory/deleted");
 };
 
 export const restoreItem = async (id) => {
-  const token = localStorage.getItem("token");
-  return await axios.put(`http://localhost:8083/inventory/restore/${id}`, {}, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  return await api.put(`/inventory/restore/${id}`);
 };
-
-
-
 
 export const updateItem = async (item) => {
-  const token = localStorage.getItem("token"); 
-  return await axios.put("http://localhost:8083/inventory/update", item, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
+  return await api.put("/inventory/update", item);
 };
+
 export const deleteItem = async (id) => {
-  console.log("Deleting item with ID:", id);
-  const token = localStorage.getItem("token"); 
-  return await axios.delete(`http://localhost:8083/inventory/delete/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  return await api.delete(`/inventory/delete/${id}`);
 };
+
 export const upload_excel = async (file) => {
-  const token = localStorage.getItem("token");
-
-  const formData = new FormData();   
-  formData.append("file", file);     
-
-  return await axios.post(
-    "http://localhost:8083/user/upload-excel",
-    formData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
+  const formData = new FormData();
+  formData.append("file", file);
+  return await api.post("/user/upload-excel", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
 };

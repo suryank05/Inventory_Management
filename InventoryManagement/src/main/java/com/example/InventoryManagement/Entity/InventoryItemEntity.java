@@ -26,16 +26,16 @@ public class InventoryItemEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 		
-	@Column(nullable = false)
+    @Column(nullable = false)
     private String itemName;
 
-    private String Description;
+    private String description;
 
     @Column(nullable = false)
-    private Integer Quantity;
+    private Integer quantity;
 
     @Column(nullable = false)
-    private BigDecimal Price;
+    private BigDecimal price;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

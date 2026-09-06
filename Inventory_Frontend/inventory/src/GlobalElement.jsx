@@ -32,7 +32,10 @@ function GlobalError() {
           Sorry, The page you're looking for doesn't exist or has been moved.
         </p>
 
-        
+        <button className="error-button" onClick={handleGoHome}>
+          <Home size={20} />
+          <span>Back to Home</span>
+        </button>
       </div>
     </div>
   );

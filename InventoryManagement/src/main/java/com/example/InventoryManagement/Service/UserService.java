@@ -11,7 +11,7 @@ import com.example.InventoryManagement.Entity.User;
 import com.example.InventoryManagement.IO.RegisterRequest;
 import com.example.InventoryManagement.Repository.UserRepo;
 
-import io.jsonwebtoken.io.IOException;
+import java.io.IOException;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.*;
@@ -51,6 +51,9 @@ public class UserService {
 
     // ================= CREATE USER =================
     public User createUser(User user) {
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
+            user.setRole("EMPLOYEE");
+        }
         return userRepo.save(user);
     }
 
@@ -125,7 +128,7 @@ public class UserService {
         sheet.addValidationData(validation);
     }
     
-    public void generateExcelTemplate(HttpServletResponse response) throws IOException, java.io.IOException {
+    public void generateExcelTemplate(HttpServletResponse response) throws IOException {
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Users");

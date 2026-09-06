@@ -37,7 +37,7 @@ import AddItem from "../Component/Inventory/AddItem";
 import AddItemAction from "../Component/Inventory/AddItemAction";
 import deleteItemAction from "../Component/Inventory/deleteItemAction";
 import DeletedInventoryPage from "../Component/Inventory/DeletedInventoryPage";
-import restoreItemAction from "../Component/Inventory/RestoreItemAction";
+import restoreItemAction from "../Component/Inventory/restoreItemAction";
 import DeletedInventoryLoader from "../Component/Inventory/DeletedInventoryLoader";
 
 export const InventoryRouter = {
