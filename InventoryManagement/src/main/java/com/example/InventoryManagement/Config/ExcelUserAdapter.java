@@ -20,26 +20,31 @@ public class ExcelUserAdapter {
 
             Sheet sheet = workbook.getSheetAt(0);
 
+            DataFormatter formatter = new DataFormatter();
+
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue;
 
                 if (row.getCell(0) == null) continue; // skip empty row
 
-                String username = row.getCell(0).getStringCellValue();
-                String email = row.getCell(1).getStringCellValue();
-                String password = row.getCell(2).getStringCellValue();
+                String username = formatter.formatCellValue(row.getCell(0)).trim();
+                String email = row.getCell(1) != null ? formatter.formatCellValue(row.getCell(1)).trim() : "";
+                String password = row.getCell(2) != null ? formatter.formatCellValue(row.getCell(2)).trim() : "";
+                String role = row.getCell(3) != null ? formatter.formatCellValue(row.getCell(3)).trim() : "";
+
+                if (username.isEmpty() || email.isEmpty()) continue;
 
                 User user = new User();
                 user.setUserName(username);
                 user.setEmail(email);
-                user.setPassword("emp@123"); 
-                user.setRole("EMPLOYEE");
+                user.setPassword(!password.isEmpty() ? password : "emp@123"); 
+                user.setRole(!role.isEmpty() ? role.toUpperCase() : "EMPLOYEE");
 
                 users.add(user);
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Error reading Excel file");
+            throw new RuntimeException("Error reading Excel file: " + e.getMessage());
         }
 
         return users;

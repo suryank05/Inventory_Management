@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.InventoryManagement.Entity.User;
 import com.example.InventoryManagement.Service.UserService;
 
-import io.jsonwebtoken.io.IOException;
+import java.io.IOException;
 import jakarta.servlet.http.HttpServletResponse;
 
 
@@ -32,16 +32,9 @@ public class UserController {
 	UserService service;
 	
 	@GetMapping("/get")
-	private ResponseEntity<List<User>> getUsers(){
-		List<User> l=service.getAll();
-		
-		if(l.isEmpty()) {
-			return ResponseEntity.noContent().build();
-		}
-		else {
-			return ResponseEntity.ok(l);
-		}
-		
+	public ResponseEntity<List<User>> getUsers(){
+		List<User> l = service.getAll();
+		return ResponseEntity.ok(l);
 	}
 	
 	@PostMapping("/add")
@@ -82,8 +75,8 @@ public class UserController {
 	}
 	
 	@GetMapping("/download-template")
-	@PreAuthorize("has_Role('ADMIN')")
-	public void downloadTemplate(HttpServletResponse response) throws IOException, java.io.IOException {
+	@PreAuthorize("hasRole('ADMIN')")
+	public void downloadTemplate(HttpServletResponse response) throws IOException {
 	    service.generateExcelTemplate(response);
 	}
 }

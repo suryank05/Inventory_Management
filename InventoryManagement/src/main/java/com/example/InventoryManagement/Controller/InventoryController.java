@@ -34,13 +34,9 @@ public class InventoryController {
 	
 	
 	@GetMapping("/getall")
-	private ResponseEntity<Page<InventoryItemEntity>> getAll(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="9") int size){
+	public ResponseEntity<Page<InventoryItemEntity>> getAll(@RequestParam(defaultValue="0") int page, @RequestParam(defaultValue="9") int size){
 		Page<InventoryItemEntity> itemPage = service.getItemPaginated(page, size);
-	    
-	    if(itemPage.isEmpty()) {
-	        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-	    }
-	    return ResponseEntity.status(HttpStatus.OK).body(itemPage);
+		return ResponseEntity.ok(itemPage);
 	}
 	
 	@PostMapping("/add")
@@ -69,17 +65,8 @@ public class InventoryController {
 	
 	@GetMapping("/deleted")
 	public ResponseEntity<List<DeletedInventoryEntity>> getDeletedItems() {
-		// This assumes you have created a method in your InventoryService called getAllDeletedItems()
-		// which just does `return deletedRepository.findAll();`
 		List<DeletedInventoryEntity> deletedItems = service.getAllDeletedItems();
-		
-		System.out.println("The request is in the getDeletedItems");
-		
-		if(deletedItems.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-		}
-		
-		return ResponseEntity.status(HttpStatus.OK).body(deletedItems);
+		return ResponseEntity.ok(deletedItems);
 	}
 	
 	
