@@ -1,38 +1,19 @@
-import axios from 'axios'
-
-const BASE_URL = "http://localhost:8083/user";
-
-const getToken = () => localStorage.getItem("token");
+import api from "./api";
 
 export const addUser = async (user) => {
-  return await axios.post(`${BASE_URL}/add`, user, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  });
+  return await api.post("/user/add", user);
 };
 
 export const getUser = async () => {
-  return await axios.get(`${BASE_URL}/get`, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  });
+  return await api.get("/user/get");
 };
 
 export const updateUser = async (user) => {
-  return await axios.put(`${BASE_URL}/update`, user, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
-  });
+  return await api.put("/user/update", user);
 };
 
-export const deleteUser = async (e) => {
-  return await axios.delete(`http://localhost:8083/user/delete`, {
-    params: { email : e },
-    headers: {
-      Authorization: `Bearer ${getToken()}`
-    }
+export const deleteUser = async (email) => {
+  return await api.delete("/user/delete", {
+    params: { email }
   });
 };
