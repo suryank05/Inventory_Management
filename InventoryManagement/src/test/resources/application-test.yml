@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:inventorytest;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration
+
+app:
+  jwt:
+    secret: test-secret-key-which-is-at-least-32-bytes-long!!
+  cors:
+    allowed-origins: http://localhost:5173
+  mail:
+    recipient: test@example.com

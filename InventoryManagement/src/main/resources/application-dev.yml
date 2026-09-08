@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  flyway:
+    enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev-only-local-secret-please-change-32-bytes-min}
+
+logging:
+  level:
+    com.example.InventoryManagement: DEBUG
+    org.springframework.security: INFO
