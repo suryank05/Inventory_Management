@@ -56,13 +56,17 @@ public class SecurityConfig {
 		return source;
 	}
 
+	
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
-		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-		provider.setUserDetailsService(userDetailsService);
+		DaoAuthenticationProvider provider =
+				new DaoAuthenticationProvider(userDetailsService);
+
 		provider.setPasswordEncoder(passwordEncoder);
+
 		return provider;
 	}
+
 
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -74,6 +78,10 @@ public class SecurityConfig {
 		http
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(cs -> cs.disable())
+				.exceptionHandling(ex -> ex
+					.authenticationEntryPoint((request, response, authException) ->
+						response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED))
+				)
 				.authenticationProvider(authenticationProvider())
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()

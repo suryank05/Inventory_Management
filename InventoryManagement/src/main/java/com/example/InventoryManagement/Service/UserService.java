@@ -3,7 +3,7 @@ package com.example.InventoryManagement.Service;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.CellRangeAddressList;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.ss.usermodel.DataValidation;
 import org.apache.poi.ss.usermodel.DataValidationConstraint;
 import org.apache.poi.ss.usermodel.DataValidationHelper;
@@ -19,13 +19,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.InventoryManagement.Config.ExcelUserAdapter;
 import com.example.InventoryManagement.DTO.UserRequest;
 import com.example.InventoryManagement.DTO.UserResponse;
+import com.example.InventoryManagement.Entity.LedgerEntity;
 import com.example.InventoryManagement.Entity.Role;
 import com.example.InventoryManagement.Entity.User;
 import com.example.InventoryManagement.Exception.BadRequestException;
 import com.example.InventoryManagement.Exception.DuplicateResourceException;
 import com.example.InventoryManagement.Exception.ResourceNotFoundException;
+import com.example.InventoryManagement.Helpers.GetCurrentUsername;
 import com.example.InventoryManagement.IO.RegisterRequest;
 import com.example.InventoryManagement.Mapper.DtoMapper;
+import com.example.InventoryManagement.Repository.LedgerInventoryRepo;
 import com.example.InventoryManagement.Repository.UserRepo;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,9 +43,15 @@ public class UserService {
 	private final ExcelUserAdapter adapter;
 	private final UserRepo userRepo;
 	private final PasswordEncoder passwordEncoder;
+	
+	private final LedgerInventoryRepo ledger;
+	
+	private final GetCurrentUsername userName;
 
 	@Transactional
 	public User registerUser(RegisterRequest request) {
+		
+		
 		if (userRepo.existsByEmail(request.getEmail())) {
 			throw new DuplicateResourceException("Email already exists");
 		}
@@ -53,15 +62,37 @@ public class UserService {
 				.password(passwordEncoder.encode(request.getPassword()))
 				.role(Role.EMPLOYEE)
 				.build();
-		return userRepo.save(user);
+		
+		User saved = userRepo.save(user);
+
+		LedgerEntity leg = LedgerEntity.builder()
+		        .userName(userName.getCurrentUsername())
+		        .quantityBefore(null)
+		        .quantityAfter(null)
+		        .actionDone("Added_User with the name as " + saved.getUserName())
+		        .build();
+
+		ledger.save(leg);
+
+		return saved;
 	}
 
 	public List<UserResponse> getAll() {
+		LedgerEntity leg=LedgerEntity.builder()
+		        .userName(userName.getCurrentUsername())
+		        .quantityBefore(null)
+		        .quantityAfter(null)
+		        .actionDone("Listed all the users")
+		        .build();
+		
+		ledger.save(leg);
+		
 		return userRepo.findAll().stream().map(DtoMapper::toUserResponse).toList();
 	}
 
 	@Transactional
 	public UserResponse createUser(UserRequest request) {
+				
 		if (userRepo.existsByEmail(request.getEmail())) {
 			throw new DuplicateResourceException("Email already exists");
 		}
@@ -75,22 +106,85 @@ public class UserService {
 				.password(passwordEncoder.encode(request.getPassword()))
 				.role(request.getRole() == null ? Role.EMPLOYEE : request.getRole())
 				.build();
-		return DtoMapper.toUserResponse(userRepo.save(user));
-	}
+		
+		User saved = userRepo.save(user);
+
+		LedgerEntity leg = LedgerEntity.builder()
+		        .userName(userName.getCurrentUsername())
+		        .quantityBefore(null)
+		        .quantityAfter(null)
+		        .actionDone("Added_User with the name as " + saved.getUserName())
+		        .build();
+
+		ledger.save(leg);
+
+		return DtoMapper.toUserResponse(saved);	}
 
 	@Transactional
 	public UserResponse updateUser(UserRequest request) {
-		User existing = userRepo.findByEmail(request.getEmail())
-				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-		existing.setUserName(request.getUserName());
-		if (request.getPassword() != null && !request.getPassword().isBlank()) {
-			existing.setPassword(passwordEncoder.encode(request.getPassword()));
-		}
-		if (request.getRole() != null) {
-			existing.setRole(request.getRole());
-		}
-		return DtoMapper.toUserResponse(userRepo.save(existing));
+	    User existing = userRepo.findByEmail(request.getEmail())
+	            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+	    String oldName = existing.getUserName();
+	    Role oldRole = existing.getRole();
+
+	    StringBuilder description = new StringBuilder();
+	    description.append("Updated user '")
+	            .append(oldName)
+	            .append("': ");
+
+	    boolean changed = false;
+
+	    if (request.getUserName() != null
+	            && !request.getUserName().equals(existing.getUserName())) {
+
+	        description.append("Username changed from '")
+	                .append(existing.getUserName())
+	                .append("' to '")
+	                .append(request.getUserName())
+	                .append("'; ");
+
+	        existing.setUserName(request.getUserName());
+	        changed = true;
+	    }
+
+	    if (request.getPassword() != null && !request.getPassword().isBlank()) {
+	        existing.setPassword(passwordEncoder.encode(request.getPassword()));
+
+	        description.append("Password changed; ");
+	        changed = true;
+	    }
+
+	    if (request.getRole() != null
+	            && !request.getRole().equals(existing.getRole())) {
+
+	        description.append("Role changed from '")
+	                .append(existing.getRole())
+	                .append("' to '")
+	                .append(request.getRole())
+	                .append("'; ");
+
+	        existing.setRole(request.getRole());
+	        changed = true;
+	    }
+
+	    if (changed) {
+	        User saved = userRepo.save(existing);
+
+	        LedgerEntity leg = LedgerEntity.builder()
+	                .userName(userName.getCurrentUsername())
+	                .quantityBefore(null)
+	                .quantityAfter(null)
+	                .actionDone(description.toString())
+	                .build();
+
+	        ledger.save(leg);
+
+	        return DtoMapper.toUserResponse(saved);
+	    }
+
+	    return DtoMapper.toUserResponse(existing);
 	}
 
 	@Transactional
@@ -98,6 +192,16 @@ public class UserService {
 		User user = userRepo.findByEmail(email)
 				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 		userRepo.delete(user);
+		
+		LedgerEntity leg=LedgerEntity.builder()
+		        .userName(userName.getCurrentUsername())
+		        .quantityBefore(null)
+		        .quantityAfter(null)
+		        .actionDone("Deleted_User wiht the name as "+user.getUserName())
+		        .build();
+		
+		ledger.save(leg);
+		
 	}
 
 	public boolean validateLogin(String email, String password) {
@@ -115,6 +219,16 @@ public class UserService {
 		users.forEach(user -> user.setPassword(passwordEncoder.encode(user.getPassword())));
 		userRepo.saveAll(users);
 		log.info("Imported {} users from Excel", users.size());
+		
+		LedgerEntity leg=LedgerEntity.builder()
+		        .userName(userName.getCurrentUsername())
+		        .quantityBefore(null)
+		        .quantityAfter(null)
+		        .actionDone("Imported users by the excel")
+		        .build();
+		
+		ledger.save(leg);
+		
 	}
 
 	public void generateExcelTemplate(HttpServletResponse response) throws IOException {
