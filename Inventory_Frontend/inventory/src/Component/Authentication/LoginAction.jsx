@@ -13,7 +13,7 @@ export default async function LoginAction({ request }) {
   try {
     const res = await login(payload);
 
-    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("token", res.data.data.token);
     if (res.data.refreshToken) {
       localStorage.setItem("refreshToken", res.data.refreshToken);
     }
